@@ -1,11 +1,13 @@
 package ape
 
+type Marshalable interface{}
+
 type Handler interface {
-	Handle(*Request, *Response) (interface{}, error)
+	Serve(*Request, *Response) (Marshalable, error)
 }
 
-type HanderFunc func(*Request, *Response) (interface{}, error)
+type HandlerFunc func(*Request, *Response) (Marshalable, error)
 
-func (f HanderFunc) Handle(req *Request, res *Response) (interface{}, error) {
+func (f HandlerFunc) Serve(req *Request, res *Response) (Marshalable, error) {
 	return f(req, res)
 }

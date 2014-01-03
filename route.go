@@ -66,6 +66,16 @@ func (r *Route) Params(path string) map[string]string {
 	return params
 }
 
+func (r *Route) Constrain(key, val string) {
+	r.Constraints[key] = val
+}
+
+func (r *Route) String() string {
+	verbs := strings.Join(r.Verbs, "|")
+
+	return "[" + verbs + "] " + r.Path
+}
+
 func (r *Route) compile() {
 	segments := strings.Split(r.Path, "/")
 	compiledSegments := make([]string, len(segments))
@@ -93,10 +103,4 @@ func (r *Route) compile() {
 			formantConstraint +
 			"$",
 	)
-}
-
-func (r *Route) String() string {
-	verbs := strings.Join(r.Verbs, "|")
-
-	return "[" + verbs + "] " + r.Path
 }

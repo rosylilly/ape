@@ -4,8 +4,13 @@ type Router struct {
 	routes []*Route
 }
 
-func (r *Router) Add(route *Route) {
+func NewRouter() *Router {
+	return &Router{make([]*Route, 0)}
+}
+
+func (r *Router) Add(route *Route) *Route {
 	r.routes = append(r.routes, route)
+	return route
 }
 
 func (r *Router) MatchedRoutes(verb string, path string) []*Route {

@@ -9,7 +9,7 @@ import (
 var _ = Describe("Route", func() {
 	var route *Route
 
-	nilHandler := HanderFunc(func(req *Request, res *Response) (interface{}, error) {
+	nilHandler := HandlerFunc(func(req *Request, res *Response) (Marshalable, error) {
 		return nil, nil
 	})
 
