@@ -36,6 +36,7 @@ func NewRoute(verbs []string, path string, handler Handler) *Route {
 }
 
 func (r *Route) Match(verb string, path string) bool {
+	verb = strings.ToUpper(verb)
 	verbHit := false
 
 	for _, expectedVerb := range r.Verbs {
