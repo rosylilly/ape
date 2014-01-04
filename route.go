@@ -25,9 +25,10 @@ type Route struct {
 
 func NewRoute(verbs []string, path string, handler Handler) *Route {
 	route := &Route{
-		Verbs:   verbs,
-		Path:    path,
-		Handler: handler,
+		Verbs:       verbs,
+		Path:        path,
+		Handler:     handler,
+		Constraints: map[string]string{},
 	}
 
 	route.compile()
@@ -68,6 +69,7 @@ func (r *Route) Params(path string) map[string]string {
 
 func (r *Route) Constrain(key, val string) {
 	r.Constraints[key] = val
+	r.compile()
 }
 
 func (r *Route) String() string {

@@ -9,7 +9,7 @@ import (
 var _ = Describe("Route", func() {
 	var route *Route
 
-	nilHandler := HandlerFunc(func(req *Request, res *Response) (Marshalable, error) {
+	nilHandler := HandlerFunc(func(req *Request, res *Response) (Any, error) {
 		return nil, nil
 	})
 
@@ -37,6 +37,17 @@ var _ = Describe("Route", func() {
 			Expect(route.Params("/articles/1.json")).To(Equal(
 				map[string]string{
 					"id":      "1",
+					"_format": "json",
+				},
+			))
+		})
+
+		It("should set constrain", func() {
+			route.Constrain("id", ".*?")
+			Expect(route.Match(VerbGet, "/articles/page/1.json")).To(BeTrue())
+			Expect(route.Params("/articles/page/1.json")).To(Equal(
+				map[string]string{
+					"id":      "page/1",
 					"_format": "json",
 				},
 			))

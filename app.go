@@ -1,5 +1,9 @@
 package ape
 
+import (
+	"./encoder"
+)
+
 var (
 	verbsGet     = []string{VerbGet, VerbHead}
 	verbsPost    = []string{VerbPost}
@@ -8,14 +12,29 @@ var (
 	verbsHead    = []string{VerbHead}
 	verbsOptions = []string{VerbOptions}
 	verbsTrace   = []string{VerbTrace}
+	verbsAll     = []string{
+		VerbDelete, VerbGet, VerbHead, VerbOptions, VerbPatch,
+		VerbPost, VerbPut, VerbTrace,
+	}
 )
 
 type App struct {
-	router *Router
+	Encoders      map[string]Encoder
+	DefaultFormat string
+	ContentTypes  map[string]string
+	ErrorHandler  ErrorHandler
+	Prefix        string
+	router        *Router
 }
 
 func NewApp() *App {
-	return &App{NewRouter()}
+	return &App{
+		Encoders:      map[string]Encoder{"json": encoder.JSONEncoder},
+		DefaultFormat: "json",
+		ContentTypes:  map[string]string{"json": "application/json; charset=utf-8"},
+		ErrorHandler:  defaultErrorHandler,
+		router:        NewRouter(),
+	}
 }
 
 func (a *App) Get(path string, handler HandlerFunc) *Route {
@@ -44,4 +63,12 @@ func (a *App) Options(path string, handler HandlerFunc) *Route {
 
 func (a *App) Trace(path string, handler HandlerFunc) *Route {
 	return a.router.Add(NewRoute(verbsTrace, path, handler))
+}
+
+func (a *App) Mount(prefix string, app *App) *Route {
+	app.Prefix = prefix
+	prefix += "/:path"
+	r := a.router.Add(NewRoute(verbsAll, prefix, app))
+	r.Constrain("path", ".*?")
+	return r
 }
