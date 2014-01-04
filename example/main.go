@@ -12,6 +12,7 @@ func main() {
 
 	sub := ape.NewApp()
 	sub.Get("/world", func(req *ape.Request, res *ape.Response) (ape.Any, error) {
+		res.Header.Set("Server", "ape v0.0.1")
 		return map[string]string{"hello":"world is mine"}, nil
 	})
 	app.Mount("/sub", sub)

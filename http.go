@@ -30,6 +30,11 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.Header().Set("Content-Type", app.ContentTypes[req.Format])
+		for header, values := range res.Header {
+			for _, value := range values {
+				w.Header().Add(header, value)
+			}
+		}
 		w.WriteHeader(res.StatusCode)
 		if res.StatusCode != http.StatusNoContent {
 			w.Write(res.Body)
