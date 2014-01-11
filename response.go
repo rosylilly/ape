@@ -27,3 +27,12 @@ func (res *Response) Write(body []byte) (int, error) {
 	}
 	return 0, nil
 }
+
+func (res *Response) Halt(statusCode int) {
+	res.StatusCode = statusCode
+	panic(&RequestHaltedError{})
+}
+
+func (res *Response) Pass() (Any, error) {
+	return nil, &RequestPassedError{}
+}

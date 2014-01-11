@@ -29,8 +29,10 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	data, err := app.Serve(req, res)
 
-	encoder := app.Encoders[req.Format]
-	res.Body, err = encoder.Encode(data)
+	if res.Body == nil {
+		encoder := app.Encoders[req.Format]
+		res.Body, err = encoder.Encode(data)
+	}
 
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -73,10 +75,20 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 			}
 		}
 
-		marshalable, err = route.Handler.Serve(req, res)
+		func() {
+			defer func() {
+				if e := recover(); e != nil {
+					err = e.(error)
+				}
+			}()
+
+			marshalable, err = route.Handler.Serve(req, res)
+		}()
 
 		if err != nil {
 			switch err.(type) {
+			case RequestPassedError:
+				continue
 			default:
 				app.ErrorHandler(req, res, err)
 			}
