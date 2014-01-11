@@ -66,6 +66,30 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 		return nil, nil
 	}
 
+	for _, filter := range app.beforeHandlers {
+		func() {
+			defer func() {
+				if e := recover(); e != nil {
+					err = e.(error)
+				}
+			}()
+
+			_, err = filter.Serve(req, res)
+		}()
+
+		if err != nil {
+			switch err.(type) {
+			case *RequestHaltedError:
+				return nil, nil
+			case *RequestPassedError:
+				continue
+			default:
+				app.ErrorHandler(req, res, err)
+				return nil, err
+			}
+		}
+	}
+
 	for _, route := range routes {
 		params := route.Params(req.Path)
 
@@ -87,7 +111,9 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 
 		if err != nil {
 			switch err.(type) {
-			case RequestPassedError:
+			case *RequestHaltedError:
+				break
+			case *RequestPassedError:
 				continue
 			default:
 				app.ErrorHandler(req, res, err)
@@ -95,6 +121,30 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 		}
 
 		break
+	}
+
+	for _, filter := range app.afterHandlers {
+		func() {
+			defer func() {
+				if e := recover(); e != nil {
+					err = e.(error)
+				}
+			}()
+
+			_, err = filter.Serve(req, res)
+		}()
+
+		if err != nil {
+			switch err.(type) {
+			case *RequestHaltedError:
+				return marshalable, nil
+			case *RequestPassedError:
+				continue
+			default:
+				app.ErrorHandler(req, res, err)
+				return marshalable, err
+			}
+		}
 	}
 
 	if res.StatusCode == 0 {

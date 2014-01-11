@@ -19,21 +19,25 @@ var (
 )
 
 type App struct {
-	Encoders      map[string]Encoder
-	DefaultFormat string
-	ContentTypes  map[string]string
-	ErrorHandler  ErrorHandler
-	Prefix        string
-	router        *Router
+	Encoders       map[string]Encoder
+	DefaultFormat  string
+	ContentTypes   map[string]string
+	ErrorHandler   ErrorHandler
+	Prefix         string
+	router         *Router
+	beforeHandlers []Handler
+	afterHandlers  []Handler
 }
 
 func NewApp() *App {
 	return &App{
-		Encoders:      map[string]Encoder{"json": encoder.JSONEncoder},
-		DefaultFormat: "json",
-		ContentTypes:  map[string]string{"json": "application/json; charset=utf-8"},
-		ErrorHandler:  defaultErrorHandler,
-		router:        NewRouter(),
+		Encoders:       map[string]Encoder{"json": encoder.JSONEncoder},
+		DefaultFormat:  "json",
+		ContentTypes:   map[string]string{"json": "application/json; charset=utf-8"},
+		ErrorHandler:   defaultErrorHandler,
+		router:         NewRouter(),
+		beforeHandlers: make([]Handler, 0),
+		afterHandlers:  make([]Handler, 0),
 	}
 }
 
@@ -71,4 +75,12 @@ func (a *App) Mount(prefix string, app *App) *Route {
 	r := a.router.Add(NewRoute(verbsAll, prefix, app))
 	r.Constrain("path", ".*?")
 	return r
+}
+
+func (a *App) Before(hander HandlerFunc) {
+	a.beforeHandlers = append(a.beforeHandlers, hander)
+}
+
+func (a *App) After(hander HandlerFunc) {
+	a.afterHandlers = append(a.afterHandlers, hander)
 }
