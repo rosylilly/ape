@@ -5,7 +5,7 @@ import (
 )
 
 type Request struct {
-	HTTPRequest *http.Request
+	*http.Request
 
 	Verb   string
 	Path   string
@@ -14,7 +14,7 @@ type Request struct {
 
 func newRequestFromHTTPRequest(req *http.Request) *Request {
 	request := &Request{
-		HTTPRequest: req,
+		Request: req,
 	}
 	request.Verb = req.Method
 	request.Path = req.RequestURI

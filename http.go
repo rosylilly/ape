@@ -18,8 +18,14 @@ func (app *App) ListenAndServe(addr string) {
 }
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, err.(error).Error(), http.StatusInternalServerError)
+		}
+	}()
+
 	req := newRequestFromHTTPRequest(r)
-	res := newResponse()
+	res := newResponse(w)
 
 	data, err := app.Serve(req, res)
 
@@ -27,19 +33,14 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res.Body, err = encoder.Encode(data)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 	} else {
-		w.Header().Set("Content-Type", app.ContentTypes[req.Format])
-		for header, values := range res.Header {
-			for _, value := range values {
-				w.Header().Add(header, value)
-			}
-		}
-		w.WriteHeader(res.StatusCode)
+		res.Header().Set("Content-Type", app.ContentTypes[req.Format])
+		res.WriteHeader(res.StatusCode)
 		if res.StatusCode != http.StatusNoContent {
-			w.Write(res.Body)
+			res.Write(res.Body)
 		} else {
-			w.Write([]byte{})
+			res.Write([]byte{})
 		}
 	}
 }

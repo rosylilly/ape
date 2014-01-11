@@ -5,14 +5,25 @@ import (
 )
 
 type Response struct {
+	http.ResponseWriter
+
 	StatusCode int
-	Header     http.Header
 	Body       []byte
+	written    bool
 }
 
-func newResponse() *Response {
+func newResponse(w http.ResponseWriter) *Response {
 	return &Response{
-		StatusCode: 0,
-		Header:     make(http.Header),
+		ResponseWriter: w,
+		StatusCode:     0,
+		written:        false,
 	}
+}
+
+func (res *Response) Write(body []byte) (int, error) {
+	if !res.written {
+		res.written = true
+		return res.ResponseWriter.Write(body)
+	}
+	return 0, nil
 }
