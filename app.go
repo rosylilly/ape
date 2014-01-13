@@ -1,7 +1,7 @@
 package ape
 
 import (
-	"./encoder"
+	"github.com/rosylilly/ape/encoder"
 )
 
 var (
