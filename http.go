@@ -61,7 +61,7 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 			logger.Printf(
 				"Completed %d in %dms",
 				res.StatusCode,
-				time.Now().UTC().Sub(now).Nanoseconds()/100,
+				time.Now().UTC().Sub(now).Nanoseconds()/10000000,
 			)
 		}
 	}()
