@@ -21,6 +21,7 @@ type Route struct {
 	Handler     Handler
 	Constraints map[string]string
 	regexp      *regexp.Regexp
+	mounted     bool
 }
 
 func NewRoute(verbs []string, path string, handler Handler) *Route {
@@ -29,6 +30,7 @@ func NewRoute(verbs []string, path string, handler Handler) *Route {
 		Path:        path,
 		Handler:     handler,
 		Constraints: map[string]string{},
+		mounted:     false,
 	}
 
 	route.compile()
@@ -72,6 +74,13 @@ func (r *Route) Constrain(key, val string) {
 	r.compile()
 }
 
+func (r *Route) Mounted() *Route {
+	r.mounted = true
+	r.compile()
+
+	return r
+}
+
 func (r *Route) String() string {
 	verbs := strings.Join(r.Verbs, "|")
 
@@ -99,10 +108,11 @@ func (r *Route) compile() {
 		compiledSegments[i] = segment
 	}
 
-	r.regexp = regexp.MustCompile(
-		"^" +
-			strings.Join(compiledSegments, "/") +
-			formantConstraint +
-			"$",
-	)
+	regexpSource = "^" + strings.Join(compiledSegments, "/") + formantConstraint
+
+	if !r.mounted {
+		regexpSource += "$"
+	}
+
+	r.regexp = regexp.MustCompile(regexpSource)
 }

@@ -71,9 +71,8 @@ func (a *App) Trace(path string, handler HandlerFunc) *Route {
 
 func (a *App) Mount(prefix string, app *App) *Route {
 	app.Prefix = prefix
-	prefix += "/:path"
 	r := a.router.Add(NewRoute(verbsAll, prefix, app))
-	r.Constrain("path", ".*?")
+	r.Mounted()
 	return r
 }
 
