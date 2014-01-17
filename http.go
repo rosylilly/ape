@@ -99,6 +99,8 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 			}
 		}
 
+		req.RouteParams = params
+
 		func() {
 			defer func() {
 				if e := recover(); e != nil {
