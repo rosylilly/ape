@@ -56,6 +56,10 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 	req.Format = app.DefaultFormat
 	req.Path = strings.TrimPrefix(req.Path, app.Prefix)
 
+	if len(req.Path) == 0 {
+		req.Path = "/"
+	}
+
 	routes := app.router.MatchedRoutes(
 		req.Verb,
 		req.Path,
