@@ -92,8 +92,5 @@ func (a *App) TraceOn(logger Logger) {
 }
 
 func (a *App) Logger() Logger {
-	if a.Parent != nil {
-		return a.Parent.Logger()
-	}
 	return a.logger
 }
