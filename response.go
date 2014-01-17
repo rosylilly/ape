@@ -36,3 +36,8 @@ func (res *Response) Halt(statusCode int) {
 func (res *Response) Pass() (Any, error) {
 	return nil, &RequestPassedError{}
 }
+
+func (res *Response) NotFound() (Any, error) {
+	res.StatusCode = 404
+	return EmptyResponse, nil
+}
