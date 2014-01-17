@@ -59,9 +59,9 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 	defer func() {
 		if logger != nil {
 			logger.Printf(
-				"Completed %d in %0.2fms",
+				"Completed %d in %.2fms",
 				res.StatusCode,
-				time.Now().UTC().Sub(now).Nanoseconds()/10000000.0,
+				float64(time.Now().UTC().Sub(now).Nanoseconds())/10000000,
 			)
 		}
 	}()
