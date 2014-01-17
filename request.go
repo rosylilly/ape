@@ -18,7 +18,7 @@ func newRequestFromHTTPRequest(req *http.Request) *Request {
 		Request: req,
 	}
 	request.Verb = req.Method
-	request.Path = req.RequestURI
+	request.Path = req.URL.Path
 
 	return request
 }
