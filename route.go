@@ -108,7 +108,7 @@ func (r *Route) compile() {
 		compiledSegments[i] = segment
 	}
 
-	regexpSource = "^" + strings.Join(compiledSegments, "/") + formantConstraint
+	regexpSource := "^" + strings.Join(compiledSegments, "/") + formantConstraint
 
 	if !r.mounted {
 		regexpSource += "$"
