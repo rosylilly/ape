@@ -19,6 +19,9 @@ func (app *App) ListenAndServe(addr string) {
 }
 
 func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	logger := app.Logger()
+	now := time.Now().UTC()
+
 	defer func() {
 		if err := recover(); err != nil {
 			http.Error(w, err.(error).Error(), http.StatusInternalServerError)
@@ -27,6 +30,19 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	req := newRequestFromHTTPRequest(r)
 	res := newResponse(w)
+
+	if logger != nil {
+		logger.Printf("ServeHTTP %s %s %s", r.Proto, r.Method, r.URL.RequestURI())
+	}
+
+	defer func() {
+		if logger != nil {
+			logger.Printf(
+				"Completed in %.2fms",
+				float64(time.Now().UTC().Sub(now).Nanoseconds())/10000000,
+			)
+		}
+	}()
 
 	data, err := app.Serve(req, res)
 
