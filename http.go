@@ -3,6 +3,7 @@ package ape
 import (
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (app *App) Server() *http.Server {
@@ -53,11 +54,27 @@ func (app *App) Serve(req *Request, res *Response) (Any, error) {
 		err         error
 	)
 
+	logger := app.Logger()
+	now := time.Now().UTC()
+	defer func() {
+		if logger != nil {
+			logger.Printf(
+				"Completed %d in %dms",
+				res.StatusCode,
+				time.Now().UTC().Sub(now).Nanoseconds()*10,
+			)
+		}
+	}()
+
 	req.Format = app.DefaultFormat
 	req.Path = strings.TrimPrefix(req.Path, app.Prefix)
 
 	if len(req.Path) == 0 {
 		req.Path = "/"
+	}
+
+	if logger != nil {
+		logger.Printf("Serve %s %s", req.Verb, req.Path)
 	}
 
 	routes := app.router.MatchedRoutes(

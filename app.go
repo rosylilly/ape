@@ -24,6 +24,8 @@ type App struct {
 	ContentTypes   map[string]string
 	ErrorHandler   ErrorHandler
 	Prefix         string
+	Parent         *App
+	logger         Logger
 	router         *Router
 	beforeHandlers []Handler
 	afterHandlers  []Handler
@@ -71,6 +73,7 @@ func (a *App) Trace(path string, handler HandlerFunc) *Route {
 
 func (a *App) Mount(prefix string, app *App) *Route {
 	app.Prefix = prefix
+	app.Parent = a
 	r := a.router.Add(NewRoute(verbsAll, prefix, app))
 	r.Mounted()
 	return r
@@ -82,4 +85,15 @@ func (a *App) Before(hander HandlerFunc) {
 
 func (a *App) After(hander HandlerFunc) {
 	a.afterHandlers = append(a.afterHandlers, hander)
+}
+
+func (a *App) TraceOn(logger Logger) {
+	a.logger = logger
+}
+
+func (a *App) Logger() Logger {
+	if a.Parent != nil {
+		return a.Parent.Logger()
+	}
+	return a.logger
 }
